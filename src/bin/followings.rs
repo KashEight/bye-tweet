@@ -3,11 +3,14 @@ use std::{env, process::exit};
 use bye_tweet::followings::FollowingData;
 use log::error;
 
-const MODE: &str = "unfollow";
-
 #[tokio::main]
 async fn main() {
     env_logger::init();
+    let mode = if let Ok(v) = env::var("MODE") {
+        v
+    } else {
+        "block".to_owned()
+    };
     let path = env::var("DATA_PATH").expect("No `DATA_PATH` in env");
     let consumer_key = env::var("CONSUMER_KEY").expect("No `CONSUMER_KEY` in env");
     let consumer_key_secret =
@@ -29,7 +32,7 @@ async fn main() {
         exit(1);
     });
 
-    match MODE {
+    match mode.as_str() {
         "unfollow" => following_data.unfollow(&token).await,
         "block" => following_data.resolve_follow(&token).await,
         _ => exit(0),
